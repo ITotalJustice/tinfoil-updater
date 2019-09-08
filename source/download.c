@@ -31,9 +31,11 @@ int downloadFile(const char *url, const char *output)
         curl_easy_cleanup(curl);
         fclose(fp);
 
-        printf("success!\n");
+        printf("download success!\n\n");
+        consoleUpdate(NULL);
         return 0;
     }
-    printf("fail\n");
+    printf("download failed...\n\n");
+    consoleUpdate(NULL);
     return 1;
 }

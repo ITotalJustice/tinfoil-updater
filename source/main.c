@@ -6,15 +6,16 @@
 #include "unzip.h"
 
 #define URL "http://tinfoil.io/repo/tinfoil.latest.zip" // don't change this blawar pls
+#define APP_URL "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-update.nro"
 #define ROOT "/"
 #define PATH "/switch/tinfoil-updater/"
 #define OUTPUT "/switch/tinfoil-updater/tinfoil.zip"
-#define APPOUTPUT "/switch/tinfoil-updater/tinfoil-updater.nro"
+#define APP_OUTPUT "/switch/tinfoil-updater/tinfoil-updater.nro"
 
-#define UPALL 0
-#define UPTINFOILFOLDER 1
-#define UPTINFOILNRO 2
-#define UPAPP 3
+#define UP_ALL 0
+#define UP_TINFOIL_FOLDER 1
+#define UP_TINFOIL_NRO 2
+#define UP_APP 3
 
 void refreshScreen(int cursor)
 {
@@ -49,6 +50,7 @@ int main(int argc, char **argv)
         hidScanInput();
         u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
 
+        // move cursor down...
         if (kDown & KEY_DOWN)
         {
             if (cursor == cursor_max) cursor = 0;
@@ -57,6 +59,7 @@ int main(int argc, char **argv)
             refreshScreen(cursor);
         }
 
+        // move cursor up...
         if (kDown & KEY_UP)
         {
             if (cursor == 0) cursor = cursor_max;
@@ -67,10 +70,23 @@ int main(int argc, char **argv)
 
         if (kDown & KEY_A)
         {
-            if (cursor == UPTINFOILNRO)
+            if (cursor == UP_APP) downloadFile(APP_URL, APP_OUTPUT);
+            else if (!downloadFile(URL, OUTPUT))
             {
-                if (downloadFile(URL, OUTPUT) != 0) return 1;
-                if (unzip(OUTPUT, ROOT, UPTINFOILNRO) != 0) return 1;
+                switch (cursor)
+                {
+                case UP_ALL:
+                    unzip(OUTPUT, ROOT, UP_ALL);
+                    break;
+
+                case UP_TINFOIL_FOLDER:
+                    unzip(OUTPUT, ROOT, UP_TINFOIL_FOLDER);
+                    break;
+
+                case UP_TINFOIL_NRO:
+                    unzip(OUTPUT, ROOT, UP_TINFOIL_NRO);
+                    break;
+                }
             }
         }
         

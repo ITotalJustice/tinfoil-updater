@@ -11,7 +11,7 @@
 
 int unzip(const char *output, const char *dir, int mode)
 {
-    // TODO, dont chdir
+    // TODO: dont chdir
     chdir(dir);
 
     unzFile zfile = unzOpen(output);
@@ -26,8 +26,9 @@ int unzip(const char *output, const char *dir, int mode)
         unzOpenCurrentFile(zfile);
         unzGetCurrentFileInfo(zfile, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
 
-        if (strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro") == 0)
-        {
+        //TODO: using goto is bad mkaaayy (dont use goto)
+        if (mode == 1 && !strstr(filename_inzip, "/tinfoil/")) goto clean;
+        else if (mode == 2 && strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro")) goto clean;
 
         char *filename_withoutpath = filename_inzip;
         char *p = filename_withoutpath;
@@ -68,14 +69,15 @@ int unzip(const char *output, const char *dir, int mode)
             fclose(outfile);
             free(buf);
         }
-        }
 
+        clean:
         unzCloseCurrentFile(zfile);
         unzGoToNextFile(zfile);
         consoleUpdate(NULL);
     }
 
     unzClose(zfile);
+    remove(output);
     printf("finished!\n");
     consoleUpdate(NULL);
 }
