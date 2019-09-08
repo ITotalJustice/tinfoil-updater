@@ -6,7 +6,7 @@
 #include "unzip.h"
 
 #define URL "http://tinfoil.io/repo/tinfoil.latest.zip" // don't change this blawar pls
-#define APP_URL "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-update.nro"
+#define APP_URL "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-updater.nro"
 #define ROOT "/"
 #define PATH "/switch/tinfoil-updater/"
 #define OUTPUT "/switch/tinfoil-updater/tinfoil.zip"
