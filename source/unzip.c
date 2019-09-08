@@ -3,12 +3,13 @@
 #include <zlib.h>
 #include <minizip/unzip.h>
 #include <string.h>
+#include <dirent.h>
 #include <switch.h>
 
 #define WRITEBUFFERSIZE 8192
 #define MAXFILENAME 256
 
-int unzip(const char *output, const char *dir)
+int unzip(const char *output, const char *dir, int mode)
 {
     // TODO, dont chdir
     chdir(dir);
@@ -25,20 +26,28 @@ int unzip(const char *output, const char *dir)
         unzOpenCurrentFile(zfile);
         unzGetCurrentFileInfo(zfile, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
 
+        if (strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro") == 0)
+        {
+
         char *filename_withoutpath = filename_inzip;
         char *p = filename_withoutpath;
 
         while ((*p) != '\0')
         {
-            if (((*p)=='/') || ((*p)=='\\'))
+            if (((*p) == '/') || ((*p) == '\\'))
                 filename_withoutpath = p + 1;
             p++;
         }
 
         if ((*filename_withoutpath) == '\0')
         {
-            printf("creating directory: %s\n", filename_inzip);
-            mkdir(filename_inzip, 0777);
+            DIR *dir = opendir(filename_inzip);
+            if (dir) closedir(dir);
+            else
+            {
+                printf("creating directory: %s\n", filename_inzip);
+                mkdir(filename_inzip, 0777);
+            }
         }
 
         else
@@ -59,6 +68,7 @@ int unzip(const char *output, const char *dir)
             fclose(outfile);
             free(buf);
         }
+        }
 
         unzCloseCurrentFile(zfile);
         unzGoToNextFile(zfile);
@@ -66,5 +76,6 @@ int unzip(const char *output, const char *dir)
     }
 
     unzClose(zfile);
-    printf("yee\n");
+    printf("finished!\n");
+    consoleUpdate(NULL);
 }

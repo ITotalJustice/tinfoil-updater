@@ -7,7 +7,7 @@ size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
     return fwrite(ptr, size, nmemb, stream);
 }
 
-int downloadZIP(const char *url, const char *output)
+int downloadFile(const char *url, const char *output)
 {
     CURL *curl = curl_easy_init();
     CURLcode res;

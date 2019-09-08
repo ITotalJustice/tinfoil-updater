@@ -1,2 +1,2 @@
 
-int downloadZIP(const char *url, const char *output);
+int downloadFile(const char *url, const char *output);
