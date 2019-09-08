@@ -1,4 +1,5 @@
 /build*
+/.vscode*
 *.elf
 *.nacp
 *.nro
