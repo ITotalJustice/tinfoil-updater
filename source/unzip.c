@@ -33,13 +33,9 @@ int unzip(const char *output, int mode)
         if (mode == UP_TINFOIL_FOLDER && !strstr(filename_inzip, "/tinfoil/")) goto clean;
         else if (mode == UP_TINFOIL_NRO && strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro")) goto clean;
 
-        char *filename_withoutpath = filename_inzip;
-        char *p = filename_withoutpath;
+        int len = strlen(filename_inzip);
 
-        for (int j = 0; p[j] != '\0'; p++)
-            if (((p[j]) == '/') || ((p[j]) == '\\')) filename_withoutpath = p + 1;
-
-        if ((filename_withoutpath[0]) == '\0')
+        if ((filename_inzip[len - 1]) == '/')
         {
             DIR *dir = opendir(filename_inzip);
             if (dir) closedir(dir);
