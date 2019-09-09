@@ -36,14 +36,10 @@ int unzip(const char *output, int mode)
         char *filename_withoutpath = filename_inzip;
         char *p = filename_withoutpath;
 
-        while ((*p) != '\0')
-        {
-            if (((*p) == '/') || ((*p) == '\\'))
-                filename_withoutpath = p + 1;
-            p++;
-        }
+        for (int j = 0; p[j] != '\0'; p++)
+            if (((p[j]) == '/') || ((p[j]) == '\\')) filename_withoutpath = p + 1;
 
-        if ((*filename_withoutpath) == '\0')
+        if ((filename_withoutpath[0]) == '\0')
         {
             DIR *dir = opendir(filename_inzip);
             if (dir) closedir(dir);
@@ -65,9 +61,7 @@ int unzip(const char *output, int mode)
             consoleUpdate(NULL);
 
             for (int j = unzReadCurrentFile(zfile, buf, size_buf); j > 0; j = unzReadCurrentFile(zfile, buf, size_buf))
-            {
                 fwrite(buf, 1, j, outfile);
-            }
 
             fclose(outfile);
             free(buf);
