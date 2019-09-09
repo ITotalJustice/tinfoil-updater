@@ -1,37 +1,39 @@
 #include <stdio.h>
-#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
 #include <switch.h>
 
-#include "download.h"
-#include "unzip.h"
+#include "includes/download.h"
+#include "includes/unzip.h"
 
-#define TINFOIL_URL "https://tinfoil.io/repo/tinfoil.latest.zip" // don't change this blawar pls
-#define HBG_URL "https://thehbg.shop/files/hbgshop.latest.zip"
-#define APP_URL "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-updater.nro"
+#define TINFOIL_URL     "https://tinfoil.io/repo/tinfoil.latest.zip"
+#define HBG_URL         "https://thehbg.shop/files/hbgshop.latest.zip"
+#define APP_URL         "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-updater.nro"
 
-#define ROOT "/"
-#define APP_PATH "/switch/tinfoil-updater/"
-#define TINFOIL_OUTPUT "/switch/tinfoil-updater/tinfoil.zip"
-#define APP_OUTPUT "/switch/tinfoil-updater/tinfoil-updater.nro"
+#define ROOT            "/"
+#define APP_PATH        "/switch/tinfoil-updater/"
+#define TINFOIL_OUTPUT  "/switch/tinfoil-updater/tinfoil.zip"
+#define APP_OUTPUT      "/switch/tinfoil-updater/tinfoil-updater.nro"
 
-#define UP_ALL 0
-#define UP_TINFOIL_FOLDER 1
-#define UP_TINFOIL_NRO 2
-#define UP_APP 3
+#define UP_ALL              0
+#define UP_TINFOIL_FOLDER   1
+#define UP_TINFOIL_NRO      2
+#define UP_APP              3
 
 void refreshScreen(int cursor, int url_location)
 {
     consoleClear();
 
     char *url[] = {"tinfoil.io", "thehbg.shop"};
-    char *list[] = {"= FULL tinfoil update", "= tinfoil folder update", "= tinfoil.nro update only", "= update this app"};
+    char *option_list[] = {"= FULL tinfoil update", "= tinfoil folder update", "= tinfoil.nro update only", "= update this app"};
 
     printf("Tinfoil-Updater: v%.1f.\tDownloading from: %s\n\n\n", 0.2, url[url_location]);
+    printf("Press (X) to change download URL\n\n\n");
 
     for (int i = 0; i < 4; i++)
     {
-        if (cursor != i) printf("[ ] %s\n\n", list[i]);
-        else printf("[x] %s\n\n", list[i]);
+        if (cursor != i) printf("[ ] %s\n\n", option_list[i]);
+        else printf("[X] %s\n\n", option_list[i]);
     }
 
     consoleUpdate(NULL);
@@ -42,6 +44,7 @@ int main(int argc, char **argv)
     // init stuff
     socketInitializeDefault();
     consoleInit(NULL);
+    chdir(ROOT);
 
     // make paths
     mkdir(APP_PATH, 0777);
@@ -81,17 +84,17 @@ int main(int argc, char **argv)
             {
             case UP_ALL:
                 downloadFile(url[url_location], TINFOIL_OUTPUT);
-                unzip(TINFOIL_OUTPUT, ROOT, UP_ALL);
+                unzip(TINFOIL_OUTPUT, UP_ALL);
                 break;
 
             case UP_TINFOIL_FOLDER:
                 downloadFile(url[url_location], TINFOIL_OUTPUT);
-                unzip(TINFOIL_OUTPUT, ROOT, UP_TINFOIL_FOLDER);
+                unzip(TINFOIL_OUTPUT, UP_TINFOIL_FOLDER);
                 break;
 
             case UP_TINFOIL_NRO:
                 downloadFile(url[url_location], TINFOIL_OUTPUT);
-                unzip(TINFOIL_OUTPUT, ROOT, UP_TINFOIL_NRO);
+                unzip(TINFOIL_OUTPUT, UP_TINFOIL_NRO);
                 break;
 
             case UP_APP:

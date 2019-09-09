@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <sys/stat.h>
 #include <zlib.h>
 #include <minizip/unzip.h>
 #include <string.h>
@@ -9,14 +8,16 @@
 #define WRITEBUFFERSIZE 8192
 #define MAXFILENAME 256
 
-int unzip(const char *output, const char *dir, int mode)
-{
-    // TODO: dont chdir
-    chdir(dir);
+#define UP_ALL              0
+#define UP_TINFOIL_FOLDER   1
+#define UP_TINFOIL_NRO      2
+#define UP_APP              3
 
+int unzip(const char *output, int mode)
+{
     unzFile zfile = unzOpen(output);
     unz_global_info gi;
-    unzGetGlobalInfo (zfile, &gi);
+    unzGetGlobalInfo(zfile, &gi);
 
     for (int i = 0; i < gi.number_entry; i++)
     {
@@ -25,14 +26,12 @@ int unzip(const char *output, const char *dir, int mode)
 
         unzOpenCurrentFile(zfile);
         unzGetCurrentFileInfo(zfile, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
-
-        //TODO: using goto is bad mkaaayy (dont use goto)
         
         // don't overwrite tinfoil config...
         if (strstr(filename_inzip, "/tinfoil/options.json")) goto clean;
 
-        if (mode == 1 && !strstr(filename_inzip, "/tinfoil/")) goto clean;
-        else if (mode == 2 && strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro")) goto clean;
+        if (mode == UP_TINFOIL_FOLDER && !strstr(filename_inzip, "/tinfoil/")) goto clean;
+        else if (mode == UP_TINFOIL_NRO && strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro")) goto clean;
 
         char *filename_withoutpath = filename_inzip;
         char *p = filename_withoutpath;
@@ -82,6 +81,8 @@ int unzip(const char *output, const char *dir, int mode)
 
     unzClose(zfile);
     remove(output);
-    printf("finished!\n");
+    printf("\nfinished!\n");
     consoleUpdate(NULL);
+
+    return 0;
 }
