@@ -5,33 +5,35 @@
 #include "download.h"
 #include "unzip.h"
 
-#define URL "https://tinfoil.io/repo/tinfoil.latest.zip" // don't change this blawar pls
+#define TINFOIL_URL "https://tinfoil.io/repo/tinfoil.latest.zip" // don't change this blawar pls
+#define HBG_URL "https://thehbg.shop/files/hbgshop.latest.zip"
 #define APP_URL "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-updater.nro"
-#define AMS_URL "https://github.com/Atmosphere-NX/Atmosphere/releases/download/0.9.3/atmosphere-0.9.3-master-25218795+hbl-2.2+hbmenu-3.1.0.zip"
+
 #define ROOT "/"
-#define PATH "/switch/tinfoil-updater/"
-#define OUTPUT "/switch/tinfoil-updater/tinfoil.zip"
+#define APP_PATH "/switch/tinfoil-updater/"
+#define TINFOIL_OUTPUT "/switch/tinfoil-updater/tinfoil.zip"
 #define APP_OUTPUT "/switch/tinfoil-updater/tinfoil-updater.nro"
-#define AMS_OUTPUT "/switch/tinfoil-updater/ams.zip"
 
 #define UP_ALL 0
 #define UP_TINFOIL_FOLDER 1
 #define UP_TINFOIL_NRO 2
 #define UP_APP 3
-#define UP_AMS 4
 
-void refreshScreen(int cursor)
+void refreshScreen(int cursor, int url_location)
 {
     consoleClear();
-    printf("Tinfoil-Updater: v%.1f ^v^\n\n\n", 0.1);
 
-    char *list[] = {"= FULL tinfoil update", "= tinfoil folder update", "= tinfoil.nro update only", "= update this app", "= update ams (EXPERIMENTAL! REBOOT AFTER INSTALL!)"};
+    char *url[] = {"tinfoil.io", "thehbg.shop"};
+    char *list[] = {"= FULL tinfoil update", "= tinfoil folder update", "= tinfoil.nro update only", "= update this app"};
 
-    for (int i = 0; i < 5; i++)
+    printf("Tinfoil-Updater: v%.1f.\tDownloading from: %s\n\n\n", 0.2, url[url_location]);
+
+    for (int i = 0; i < 4; i++)
     {
         if (cursor != i) printf("[ ] %s\n\n", list[i]);
         else printf("[x] %s\n\n", list[i]);
     }
+
     consoleUpdate(NULL);
 }
 
@@ -42,10 +44,12 @@ int main(int argc, char **argv)
     consoleInit(NULL);
 
     // make paths
-    mkdir(PATH, 0777);
+    mkdir(APP_PATH, 0777);
 
-    int cursor = 0, cursor_max = 4;
-    refreshScreen(cursor);
+    char *url[] = {TINFOIL_URL, HBG_URL};
+    int url_location = 0;
+    int cursor = 0, cursor_max = 3;
+    refreshScreen(cursor, url_location);
 
     // muh loooooop
     while(appletMainLoop())
@@ -59,7 +63,7 @@ int main(int argc, char **argv)
             if (cursor == cursor_max) cursor = 0;
             else cursor++;
 
-            refreshScreen(cursor);
+            refreshScreen(cursor, url_location);
         }
 
         // move cursor up...
@@ -68,7 +72,7 @@ int main(int argc, char **argv)
             if (cursor == 0) cursor = cursor_max;
             else cursor--;
 
-            refreshScreen(cursor);
+            refreshScreen(cursor, url_location);
         }
 
         if (kDown & KEY_A)
@@ -76,29 +80,31 @@ int main(int argc, char **argv)
             switch (cursor)
             {
             case UP_ALL:
-                downloadFile(URL, OUTPUT);
-                unzip(OUTPUT, ROOT, UP_ALL);
+                downloadFile(url[url_location], TINFOIL_OUTPUT);
+                unzip(TINFOIL_OUTPUT, ROOT, UP_ALL);
                 break;
 
             case UP_TINFOIL_FOLDER:
-                downloadFile(URL, OUTPUT);
-                unzip(OUTPUT, ROOT, UP_TINFOIL_FOLDER);
+                downloadFile(url[url_location], TINFOIL_OUTPUT);
+                unzip(TINFOIL_OUTPUT, ROOT, UP_TINFOIL_FOLDER);
                 break;
 
             case UP_TINFOIL_NRO:
-                downloadFile(URL, OUTPUT);
-                unzip(OUTPUT, ROOT, UP_TINFOIL_NRO);
+                downloadFile(url[url_location], TINFOIL_OUTPUT);
+                unzip(TINFOIL_OUTPUT, ROOT, UP_TINFOIL_NRO);
                 break;
 
             case UP_APP:
                 downloadFile(APP_URL, APP_OUTPUT);
                 break;
-
-            case UP_AMS:
-                downloadFile(AMS_URL, AMS_OUTPUT);
-                unzip(AMS_OUTPUT, ROOT, UP_AMS);
-                break;
             }
+        }
+
+        if (kDown & KEY_X)
+        {
+            if (url_location == 0) url_location = 1;
+            else url_location = 0;
+            refreshScreen(cursor, url_location);
         }
         
         if (kDown & KEY_PLUS) break;

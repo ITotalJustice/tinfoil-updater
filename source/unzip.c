@@ -27,6 +27,10 @@ int unzip(const char *output, const char *dir, int mode)
         unzGetCurrentFileInfo(zfile, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
 
         //TODO: using goto is bad mkaaayy (dont use goto)
+        
+        // don't overwrite tinfoil config...
+        if (strstr(filename_inzip, "/tinfoil/options.json")) goto clean;
+
         if (mode == 1 && !strstr(filename_inzip, "/tinfoil/")) goto clean;
         else if (mode == 2 && strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro")) goto clean;
 

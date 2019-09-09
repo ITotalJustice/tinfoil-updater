@@ -20,10 +20,10 @@ int downloadFile(const char *url, const char *output)
         FILE *fp = fopen(output, "wb");
 
         curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // enable for debug
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow redirect
+        //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // enable for debug
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // ssl bs
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); // more ssl bs
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 
