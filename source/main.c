@@ -91,7 +91,12 @@ int main(int argc, char **argv)
                 break;
 
             case UP_APP:
-                downloadFile(APP_URL, APP_OUTPUT);
+                if (downloadFile(APP_URL, APP_OUTPUT) == 0)
+                {
+                    FILE *f = fopen("/switch/tinfoil-updater.nro", "r");
+                    if (f) remove("/switch/tinfoil-updater.nro");
+                    fclose(f);
+                }
                 break;
             }
         }
