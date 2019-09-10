@@ -15,11 +15,6 @@
 #define TINFOIL_OUTPUT      "/switch/tinfoil-updater/tinfoil.zip"
 #define APP_OUTPUT          "/switch/tinfoil-updater/tinfoil-updater.nro"
 
-#define UP_ALL              0
-#define UP_TINFOIL_FOLDER   1
-#define UP_TINFOIL_NRO      2
-#define UP_APP              3
-
 void refreshScreen(int cursor, int url_location)
 {
     consoleClear();

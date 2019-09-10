@@ -5,13 +5,10 @@
 #include <dirent.h>
 #include <switch.h>
 
+#include "includes/unzip.h"
+
 #define WRITEBUFFERSIZE     10000000 // 10MB
 #define MAXFILENAME         256
-
-#define UP_ALL              0
-#define UP_TINFOIL_FOLDER   1
-#define UP_TINFOIL_NRO      2
-#define UP_APP              3
 
 int unzip(const char *output, int mode)
 {

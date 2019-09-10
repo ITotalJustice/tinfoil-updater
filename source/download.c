@@ -4,22 +4,23 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-
 #include <switch.h>
 
-#define Megabytes_in_Bytes	1048576
+#include "includes/download.h"
+
+#define MEGABYTES_IN_BYTES	1048576
 #define API_AGENT           "ITotalJustice"
 
-struct MemoryStruct
+typedef struct MemoryStruct
 {
   char *memory;
   size_t size;
-};
+} MemoryStruct;
 
 static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userdata)
 {
   size_t realsize = size * nmemb;
-  struct MemoryStruct *mem = (struct MemoryStruct *)userdata;
+  MemoryStruct *mem = (MemoryStruct *)userdata;
 
   char *ptr = realloc(mem->memory, mem->size + realsize + 1);
   if (ptr == NULL) 
@@ -38,7 +39,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 
 int download_progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow)
 {	
-    printf("* DOWNLOADING: %.2fMB of %.2fMB *\r", dlnow / Megabytes_in_Bytes, dltotal / Megabytes_in_Bytes);
+    printf("* DOWNLOADING: %.2fMB of %.2fMB *\r", dlnow / MEGABYTES_IN_BYTES, dltotal / MEGABYTES_IN_BYTES);
 	
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -60,7 +61,7 @@ int downloadFile(const char *url, const char *output)
         FILE *fp = fopen(output, "wb");
         if (fp)
         {
-            struct MemoryStruct chunk;
+            MemoryStruct chunk;
             chunk.memory = malloc(1);
             chunk.size = 0;
 
@@ -71,9 +72,11 @@ int downloadFile(const char *url, const char *output)
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
+            // write calls
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
+            // progress calls, still slowish
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
             curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, download_progress);
 
