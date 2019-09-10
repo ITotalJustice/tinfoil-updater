@@ -23,11 +23,8 @@ int unzip(const char *output, int mode)
 
         unzOpenCurrentFile(zfile);
         unzGetCurrentFileInfo(zfile, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
-
-
-        //if (strcasestr(filename_inzip, "mercury")) goto jump_to_end;
         
-        // don't overwrite tinfoil config...
+        // don't overwrite tinfoil config / filter mecury...
         if (strstr(filename_inzip, "/tinfoil/options.json") || strstr(filename_inzip, "mercury")) goto jump_to_end;
 
         if (mode == UP_TINFOIL_FOLDER && !strstr(filename_inzip, "/tinfoil/")) goto jump_to_end;

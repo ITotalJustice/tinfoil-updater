@@ -22,7 +22,7 @@ void refreshScreen(int cursor, int url_location)
     char *url_list[] = {"tinfoil.io", "thehbg.shop"};
     char *option_list[] = {"= FULL tinfoil update", "= tinfoil folder update", "= tinfoil.nro update only", "= update this app"};
 
-    printf("Tinfoil-Updater: v%.1f.\tDownloading from: %s\n\n\n", 0.2, url_list[url_location]);
+    printf("Tinfoil-Updater: v%.1f.\tDownloading from: %s\n\n\n", 0.3, url_list[url_location]);
     printf("Press (X) to change download URL\n\n\n");
 
     for (int i = 0; i < 4; i++)
