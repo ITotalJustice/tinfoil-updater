@@ -6,14 +6,14 @@
 #include "includes/download.h"
 #include "includes/unzip.h"
 
-#define TINFOIL_URL     "https://tinfoil.io/repo/tinfoil.latest.zip"
-#define HBG_URL         "https://thehbg.shop/files/hbgshop.latest.zip"
-#define APP_URL         "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-updater.nro"
+#define TINFOIL_URL         "https://tinfoil.io/repo/tinfoil.latest.zip"
+#define HBG_URL             "https://thehbg.shop/files/hbgshop.latest.zip"
+#define APP_URL             "https://github.com/ITotalJustice/tinfoil-updater/releases/latest/download/tinfoil-updater.nro"
 
-#define ROOT            "/"
-#define APP_PATH        "/switch/tinfoil-updater/"
-#define TINFOIL_OUTPUT  "/switch/tinfoil-updater/tinfoil.zip"
-#define APP_OUTPUT      "/switch/tinfoil-updater/tinfoil-updater.nro"
+#define ROOT                "/"
+#define APP_PATH            "/switch/tinfoil-updater/"
+#define TINFOIL_OUTPUT      "/switch/tinfoil-updater/tinfoil.zip"
+#define APP_OUTPUT          "/switch/tinfoil-updater/tinfoil-updater.nro"
 
 #define UP_ALL              0
 #define UP_TINFOIL_FOLDER   1
@@ -24,10 +24,10 @@ void refreshScreen(int cursor, int url_location)
 {
     consoleClear();
 
-    char *url[] = {"tinfoil.io", "thehbg.shop"};
+    char *url_list[] = {"tinfoil.io", "thehbg.shop"};
     char *option_list[] = {"= FULL tinfoil update", "= tinfoil folder update", "= tinfoil.nro update only", "= update this app"};
 
-    printf("Tinfoil-Updater: v%.1f.\tDownloading from: %s\n\n\n", 0.2, url[url_location]);
+    printf("Tinfoil-Updater: v%.1f.\tDownloading from: %s\n\n\n", 0.2, url_list[url_location]);
     printf("Press (X) to change download URL\n\n\n");
 
     for (int i = 0; i < 4; i++)
@@ -65,7 +65,6 @@ int main(int argc, char **argv)
         {
             if (cursor == cursor_max) cursor = 0;
             else cursor++;
-
             refreshScreen(cursor, url_location);
         }
 
@@ -74,7 +73,6 @@ int main(int argc, char **argv)
         {
             if (cursor == 0) cursor = cursor_max;
             else cursor--;
-
             refreshScreen(cursor, url_location);
         }
 

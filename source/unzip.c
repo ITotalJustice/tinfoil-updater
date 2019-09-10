@@ -5,8 +5,8 @@
 #include <dirent.h>
 #include <switch.h>
 
-#define WRITEBUFFERSIZE 8192
-#define MAXFILENAME 256
+#define WRITEBUFFERSIZE     10000000 // 10MB
+#define MAXFILENAME         256
 
 #define UP_ALL              0
 #define UP_TINFOIL_FOLDER   1
@@ -28,15 +28,15 @@ int unzip(const char *output, int mode)
         unzGetCurrentFileInfo(zfile, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
         
         // don't overwrite tinfoil config...
-        if (strstr(filename_inzip, "/tinfoil/options.json")) goto clean;
+        if (strstr(filename_inzip, "/tinfoil/options.json")) goto jump_to_end;
 
-        if (mode == UP_TINFOIL_FOLDER && !strstr(filename_inzip, "/tinfoil/")) goto clean;
-        else if (mode == UP_TINFOIL_NRO && strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro")) goto clean;
+        if (mode == UP_TINFOIL_FOLDER && !strstr(filename_inzip, "/tinfoil/")) goto jump_to_end;
+        else if (mode == UP_TINFOIL_NRO && strcmp(filename_inzip, "switch/tinfoil/tinfoil.nro")) goto jump_to_end;
 
-        int len = strlen(filename_inzip);
-
-        if ((filename_inzip[len - 1]) == '/')
+        // check if the string ends with a /, if so, then its a directory.
+        if ((filename_inzip[strlen(filename_inzip) - 1]) == '/')
         {
+            // check if directory exists
             DIR *dir = opendir(filename_inzip);
             if (dir) closedir(dir);
             else
@@ -50,20 +50,22 @@ int unzip(const char *output, int mode)
         {
             const char *write_filename = filename_inzip;
             FILE *outfile = fopen(write_filename, "wb");
-            uInt size_buf = WRITEBUFFERSIZE;
-            void *buf = malloc(size_buf);
+            if (outfile)
+            {
+                void *buf = malloc(WRITEBUFFERSIZE);
 
-            printf("writing file: %s\n", write_filename);
-            consoleUpdate(NULL);
+                printf("writing file: %s\n", write_filename);
+                consoleUpdate(NULL);
 
-            for (int j = unzReadCurrentFile(zfile, buf, size_buf); j > 0; j = unzReadCurrentFile(zfile, buf, size_buf))
-                fwrite(buf, 1, j, outfile);
+                for (int j = unzReadCurrentFile(zfile, buf, WRITEBUFFERSIZE); j > 0; j = unzReadCurrentFile(zfile, buf, WRITEBUFFERSIZE))
+                    fwrite(buf, 1, j, outfile);
 
-            fclose(outfile);
-            free(buf);
+                fclose(outfile);
+                free(buf);
+            }
         }
 
-        clean:
+        jump_to_end: // goto
         unzCloseCurrentFile(zfile);
         unzGoToNextFile(zfile);
         consoleUpdate(NULL);
