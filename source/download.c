@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <curl/curl.h>
 #include <string.h>
 #include <time.h>
@@ -8,6 +9,32 @@
 
 #define Megabytes_in_Bytes	1048576
 #define API_AGENT           "ITotalJustice"
+
+struct MemoryStruct
+{
+  char *memory;
+  size_t size;
+};
+
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userdata)
+{
+  size_t realsize = size * nmemb;
+  struct MemoryStruct *mem = (struct MemoryStruct *)userdata;
+
+  char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+  if (ptr == NULL) 
+  {
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+ 
+  mem->memory = ptr;
+  memcpy(&(mem->memory[mem->size]), contents, realsize);
+  mem->size += realsize;
+  mem->memory[mem->size] = 0;
+ 
+  return realsize;
+}
 
 int download_progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow)
 {	
@@ -33,6 +60,10 @@ int downloadFile(const char *url, const char *output)
         FILE *fp = fopen(output, "wb");
         if (fp)
         {
+            struct MemoryStruct chunk;
+            chunk.memory = malloc(1);
+            chunk.size = 0;
+
             printf("\n");
             curl_easy_setopt(curl, CURLOPT_URL, url);
             curl_easy_setopt(curl, CURLOPT_USERAGENT, API_AGENT);
@@ -40,18 +71,22 @@ int downloadFile(const char *url, const char *output)
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-            curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 524288L);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
             curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, download_progress);
 
-            // execute curl
+            // execute curl, save result
             CURLcode res = curl_easy_perform(curl);
 
+            // write from mem to file
+            fwrite(chunk.memory, 1, chunk.size, fp);
+
             // clean
-            fclose(fp);
             curl_easy_cleanup(curl);
+            free(chunk.memory);
+            fclose(fp);
 
             if (res == CURLE_OK)
             {
