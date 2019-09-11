@@ -39,7 +39,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 APP_TITLE   := Tinfoil-Updater
 APP_AUTHOR  := TotalJustice
-APP_VERSION := 0.3
+APP_VERSION := 0.3.1
 
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
