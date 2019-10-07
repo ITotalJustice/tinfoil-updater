@@ -1,32 +1,33 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <curl/curl.h>
-#include <string.h>
 #include <time.h>
-#include <math.h>
+#include <curl/curl.h>
 #include <switch.h>
 
-#include "includes/download.h"
+#include "download.h"
+#include "menu.h"
 
-#define MEGABYTES_IN_BYTES	1048576
 #define API_AGENT           "ITotalJustice"
+#define DOWNLOAD_BAR_MAX    500
 
-typedef struct MemoryStruct
+
+struct MemoryStruct
 {
   char *memory;
   size_t size;
-} MemoryStruct;
+  int mode;
+};
 
-static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userdata)
+static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, void *userdata)
 {
   size_t realsize = size * nmemb;
-  MemoryStruct *mem = (MemoryStruct *)userdata;
+  struct MemoryStruct *mem = (struct MemoryStruct *)userdata;
 
   char *ptr = realloc(mem->memory, mem->size + realsize + 1);
-  if (ptr == NULL) 
+
+  if (ptr == NULL)
   {
-    printf("not enough memory (realloc returned NULL)\n");
-    return 0;
+      error_box(350, 250, "Failed to realloc mem");
+      return 0;
   }
  
   mem->memory = ptr;
@@ -38,18 +39,30 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 }
 
 int download_progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow)
-{	
-    printf("* DOWNLOADING: %.2fMB of %.2fMB *\r", dlnow / MEGABYTES_IN_BYTES, dltotal / MEGABYTES_IN_BYTES);
-	
+{
+    // if file empty or download hasn't started, exit.
+    if (dltotal <= 0.0) return 0;
+
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    int counter = round(tv.tv_usec / 100000);
+    int counter = tv.tv_usec / 100000;
 
+    // update progress bar every so often.
     if (counter == 0 || counter == 2 || counter == 4 || counter == 6 || counter == 8)
     {
-        consoleUpdate(NULL);
+        // clear the renderer.
+        SDL_RenderClear(SDL_GetRenderer(SDL_GetWindow()));
+        // load screenshot of the main menu.
+        SDL_RenderCopy(SDL_GetRenderer(SDL_GetWindow()), screen_shot, NULL, NULL);
+        // pop_up box.
+        pop_up_box(fntSmall, 350, 250, white, "Downloading...");
+        // bar max size.
+        SDL_DrawShape(white, 380, 380, DOWNLOAD_BAR_MAX, 30);
+        // progress bar being filled.
+        SDL_DrawShape(faint_blue, 380, 380, (dlnow / dltotal) * DOWNLOAD_BAR_MAX, 30);
+        // render everything to the screen.
+        SDL_UpdateRenderer();
     }
-    fflush(stdout);
 	return 0;
 }
 
@@ -61,11 +74,10 @@ int downloadFile(const char *url, const char *output)
         FILE *fp = fopen(output, "wb");
         if (fp)
         {
-            MemoryStruct chunk;
+            struct MemoryStruct chunk;
             chunk.memory = malloc(1);
             chunk.size = 0;
 
-            printf("\n");
             curl_easy_setopt(curl, CURLOPT_URL, url);
             curl_easy_setopt(curl, CURLOPT_USERAGENT, API_AGENT);
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -73,10 +85,10 @@ int downloadFile(const char *url, const char *output)
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
             // write calls
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_callback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
-            // progress calls, still slowish
+            // progress calls, ssl still slow
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
             curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, download_progress);
 
@@ -91,16 +103,12 @@ int downloadFile(const char *url, const char *output)
             free(chunk.memory);
             fclose(fp);
 
-            if (res == CURLE_OK)
-            {
-                printf("\n\ndownload complete!\n\n");
-                consoleUpdate(NULL);
-                return 0;
-            }
+            if (res == CURLE_OK) return 0;
         }
     }
 
-    printf("\n\ndownload failed...\n\n");
-    consoleUpdate(NULL);
+    SDL_RenderClear(SDL_GetRenderer(SDL_GetWindow()));
+    SDL_RenderCopy(SDL_GetRenderer(SDL_GetWindow()), screen_shot, NULL, NULL);
+    error_box(350, 250, "Download failed...");
     return 1;
 }
